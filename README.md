@@ -16,26 +16,34 @@ pip install -r requirements.txt
 ## PLC:n asetukset
 
 ![ip_addr](/imgs/plc_ip_addr.png)
+
 **Kuva 1**. IP-osoitteen määritys.
 
 ![access_level](/imgs/plc_access_level.png)
+
 **Kuva 2**. Käyttöoikeustason asetus.
 
 ![permit_putget](/imgs/plc_permit_putget.png)
+
 **Kuva 3**. PUT/GET kommunikoinnin salliminen.
 
 ![inputs](/imgs/plc_db2_inputs.png)
+
 **Kuva 4** Tulot (DB2).
 
 ![outputs](/imgs/plc_db3_outputs.png)
+
 **Kuva 5** Lähdöt (DB3).
 
 ![db](/imgs/plc_db_config.png)
-**Kuva 4**. Optimoinnin asetus pois päältä.
+
+**Kuva 6**. Optimoinnin asetus pois päältä.
 
 ## S7-PLCSIM Advanced
 
 ![plcsim](/imgs/plcsim_adv5.png)
+
+**Kuva 7**. Asetukset PLCSIM Advanced -ohjelmassa
 
 Aseta PLCSIM Advanced -ohjelmassa sama IP-osoite kuin PLC:ssä.
 
