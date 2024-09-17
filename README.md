@@ -37,7 +37,7 @@ pip install -r requirements.txt
 
 ![db](/imgs/plc_db_config.png)
 
-**Kuva 6**. Optimoinnin asetus pois päältä.
+**Kuva 6**. Optimoinnin asetus pois päältä (DB2 ja DB3).
 
 ## S7-PLCSIM Advanced
 
