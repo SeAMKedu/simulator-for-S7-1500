@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/851507214.svg)](https://doi.org/10.5281/zenodo.14092688)
+
 # Simulaattori Siemens Simatic S7-1500 -sarjan logiikoille
 
 Ohjelmassa on neljä liikkuvaa sylinteriä ja neljä moottoria, joita voidaan ohjata PLC:n avulla. PLC saa simulaattorilta tiedon sylinterien ja moottorien tilasta. Kommunikointi simulaattorin ja PLC:n välillä tapahtuu Snap7-kirjaston avulla.
