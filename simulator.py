@@ -26,10 +26,13 @@ HEIGHT_IO = (RESY - 4 * (HEIGHT_NAME + HEIGHT_IMAGE)) / 4
 PATH = pathlib.Path(__file__).parent
 IMAGE_CYL = Image.open(os.path.join(PATH, "images", "cylinder.png"))
 IMAGE_MT0 = Image.open(os.path.join(PATH, "images", "motor_red.png"))
+IMAGE_MTT = Image.open(os.path.join(PATH, "images", "motor_yellow.png"))
 IMAGE_MT1 = Image.open(os.path.join(PATH, "images", "motor_green.png"))
 # Minimum and maximum X position of the cylinder.
 CYL_XMIN = 0
 CYL_XMAX = 180
+# Delay when the motor starts or stops.
+MOTOR_TRANSITION_DELAY = 2
 
 
 class NameFrame(ctk.CTkFrame):
@@ -99,22 +102,35 @@ class MotorImageFrame(ctk.CTkFrame):
 
         self.state = 0
         self.img0 = ctk.CTkImage(light_image=IMAGE_MT0, size=(80, 50))
+        self.imgt = ctk.CTkImage(light_image=IMAGE_MTT, size=(80, 50))
         self.img1 = ctk.CTkImage(light_image=IMAGE_MT1, size=(80, 50))
         self.image0 = ctk.CTkLabel(self, image=self.img0, text="") # motor OFF
         self.image0.grid(row=0, column=0)
+        self.imaget = ctk.CTkLabel(self, image=self.imgt, text="") # transition
+        self.imaget.grid(row=0, column=0)
         self.image1 = ctk.CTkLabel(self, image=self.img1, text="") # motor ON
         self.image1.grid(row=0, column=0)
         self.image0.lift()
 
-    def set_on(self):
-        """Show the image of the green motor."""
-        self.image1.lift()
+    def _start_motor(self):
+        self.imaget.lift()  # show yellow motor
+        time.sleep(MOTOR_TRANSITION_DELAY)
+        self.image1.lift()  # show green motor
         self.state = 1
-
-    def set_off(self):
-        """Show the image of the red motor."""
-        self.image0.lift()
+    
+    def _stop_motor(self):
+        self.imaget.lift()  # show yellow motor
+        time.sleep(MOTOR_TRANSITION_DELAY)
+        self.image0.lift()  # show red motor
         self.state = 0
+
+    def turn_on(self):
+        """Show the image of the green motor."""
+        Thread(target=self._start_motor).start()
+        
+    def turn_off(self):
+        """Show the image of the red motor."""
+        Thread(target=self._stop_motor).start()
 
 
 class CylinderFrame(ctk.CTkFrame):
@@ -310,31 +326,31 @@ class SimulationFrame(ctk.CTkFrame):
             self.iCyl4plus = False
             self.cyl4.image.move_to_minus()
         # Start motor.
-        if self.iMot1running == False and self.qMot1start:
-            self.iMot1running = True
-            self.mot1.image.set_on()
-        if self.iMot2running == False and self.qMot2start:
-            self.iMot2running = True
-            self.mot2.image.set_on()
-        if self.iMot3running == False and self.qMot3start:
-            self.iMot3running = True
-            self.mot3.image.set_on()
-        if self.iMot4running == False and self.qMot4start:
-            self.iMot4running = True
-            self.mot4.image.set_on()
+        if self.mot1.image.state == 0 and self.qMot1start:
+            self.mot1.image.state = -1
+            self.mot1.image.turn_on()
+        if self.mot2.image.state == 0 and self.qMot2start:
+            self.mot2.image.state = -1
+            self.mot2.image.turn_on()
+        if self.mot3.image.state == 0 and self.qMot3start:
+            self.mot3.image.state = -1
+            self.mot3.image.turn_on()
+        if self.mot4.image.state == 0 and self.qMot4start:
+            self.mot4.image.state = -1
+            self.mot4.image.turn_on()
         # Stop motor.
-        if self.iMot1running and self.qMot1start == False:
-            self.iMot1running = False
-            self.mot1.image.set_off()
-        if self.iMot2running and self.qMot2start == False:
-            self.iMot2running = False
-            self.mot2.image.set_off()
-        if self.iMot3running and self.qMot3start == False:
-            self.iMot3running = False
-            self.mot3.image.set_off()
-        if self.iMot4running and self.qMot4start == False:
-            self.iMot4running = False
-            self.mot4.image.set_off()
+        if self.mot1.image.state == 1 and self.qMot1start == False:
+            self.mot1.image.state = -1
+            self.mot1.image.turn_off()
+        if self.mot2.image.state == 1 and self.qMot2start == False:
+            self.mot2.image.state = -1
+            self.mot2.image.turn_off()
+        if self.mot3.image.state == 1 and self.qMot3start == False:
+            self.mot3.image.state = -1
+            self.mot3.image.turn_off()
+        if self.mot4.image.state == 1 and self.qMot4start == False:
+            self.mot4.image.state = -1
+            self.mot4.image.turn_off()
 
         self.after(10, self.dbread)
 
@@ -350,10 +366,22 @@ class SimulationFrame(ctk.CTkFrame):
         self.iCyl3plus = True if self.cyl3.image.xpos == CYL_XMAX else False
         self.iCyl4plus = True if self.cyl4.image.xpos == CYL_XMAX else False
         # Set the inputs of the motors.
-        self.iMot1running = True if self.mot1.image.state == 1 else False
-        self.iMot2running = True if self.mot2.image.state == 1 else False
-        self.iMot3running = True if self.mot3.image.state == 1 else False
-        self.iMot4running = True if self.mot4.image.state == 1 else False
+        if self.mot1.image.state == 1:
+            self.iMot1running = True
+        elif self.mot1.image.state == 0:
+            self.iMot1running = False
+        if self.mot2.image.state == 1:
+            self.iMot2running = True
+        elif self.mot2.image.state == 0:
+            self.iMot2running = False
+        if self.mot3.image.state == 1:
+            self.iMot3running = True
+        elif self.mot3.image.state == 0:
+            self.iMot3running = False
+        if self.mot4.image.state == 1:
+            self.iMot4running = True
+        elif self.mot4.image.state == 0:
+            self.iMot4running = False
         # Set the label texts.
         self.cyl1.io1.label1.configure(text=f" iCyl1minus = {self.iCyl1minus}")
         self.cyl2.io1.label1.configure(text=f" iCyl2minus = {self.iCyl2minus}")
